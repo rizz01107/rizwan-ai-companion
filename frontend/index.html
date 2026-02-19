@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RIZWAN AI Companion</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+
+    <div class="main-container">
+        <div id="auth-section" class="card fade-in">
+            <h2>Welcome to Rizwan AI 🤖</h2>
+            <div class="tabs">
+                <button id="tab-login" class="active">Login</button>
+                <button id="tab-register">Register</button>
+            </div>
+
+            <div id="auth-form" class="form-container">
+                <div id="username-container" class="hidden">
+                    <input type="text" id="username" placeholder="Full Name" class="input-field">
+                </div>
+                <input type="email" id="email" placeholder="Email Address" class="input-field">
+                <input type="password" id="password" placeholder="Password" class="input-field">
+                <button id="auth-btn">Sign In</button>
+            </div>
+            <p id="auth-msg"></p>
+        </div>
+
+        <div id="chat-section" class="card chat-card hidden">
+            <header>
+                <div class="user-info">
+                    <div class="avatar">R</div>
+                    <div class="details">
+                        <span id="display-name">User</span>
+                        <div class="online-status">
+                            <span class="status-dot"></span> Online
+                        </div>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <button id="stats-btn" title="View Mood History">
+                        <i class="fas fa-chart-line"></i>
+                    </button>
+                    <button id="logout-btn" title="Logout">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </button>
+                </div>
+            </header>
+
+            <div id="mood-chart-container" class="hidden">
+                <canvas id="moodChart"></canvas>
+            </div>
+
+            <div id="chat-box">
+                <div class="msg ai-msg">
+                    Hello Muhammad Rizwan! I'm your AI Companion. I can analyze your mood and feelings. How are you
+                    today?
+                </div>
+            </div>
+
+            <div id="typing" class="hidden">
+                <div class="typing-bubble">
+                    <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                </div>
+            </div>
+
+            <div class="input-area">
+                <button id="mic-btn" title="Voice Input">
+                    <i class="fas fa-microphone"></i>
+                </button>
+
+                <input type="text" id="user-input" placeholder="Type or speak here..." autocomplete="off" />
+
+                <button id="send-btn">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
