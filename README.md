@@ -64,6 +64,16 @@ pip install -r requirements.txt
 ```
 ---
 
+
+## 👨‍💻 About the Developer
+
+**Muhammad Rizwan** is a dedicated **AI Enthusiast** with a deep interest in building intelligent, full-stack systems. His expertise lies in bridging the gap between complex backend architectures (FastAPI) and sophisticated AI models (LLMs/Generative AI). 
+
+He is passionate about NLP, Emotional Intelligence in machines, and creating scalable AI solutions that feel personal and intuitive.
+
+
+---
+
 ## 🔗 Connect with Developer
 * **GitHub:** [rizz01107](https://github.com/rizz01107)
 * **LinkedIn:** [rizz01107](https://www.linkedin.com/in/rizz01107)
