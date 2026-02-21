@@ -31,9 +31,10 @@ function switchToChat(name) {
     scrollChat();
 }
 
-// --- 2. Auth Logic ---
+// --- 2. Auth Logic (FIXED) ---
 async function handleAuth(e) {
     if (e) e.preventDefault();
+
     const email = emailInput.value.trim();
     const password = passwordInput.value.trim();
     const username = usernameInput.value.trim();
@@ -43,11 +44,17 @@ async function handleAuth(e) {
         return;
     }
 
-    const payload = isLoginMode ? { email, password } : { username, email, password };
+    // Backend models ke mutabiq payload
+    const payload = isLoginMode
+        ? { email: email, password: password }
+        : { username: username, email: email, password: password };
+
     const endpoint = isLoginMode ? "/auth/login" : "/auth/register";
 
     try {
         authMsg.innerText = "Processing...";
+        authMsg.style.color = "#4f46e5";
+
         const response = await fetch(`${API_BASE_URL}${endpoint}`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -55,31 +62,42 @@ async function handleAuth(e) {
         });
 
         const data = await response.json();
+
         if (response.ok) {
             if (isLoginMode) {
                 localStorage.setItem("token", data.access_token);
                 localStorage.setItem("username", data.username || "User");
                 switchToChat(data.username || "User");
             } else {
-                alert("Account created! Please login.");
+                alert("Account created successfully! Now please login.");
+                // Switch to login tab automatically
+                isLoginMode = true;
                 tabLogin.click();
+                authMsg.innerText = "Registration successful. Please login.";
+                authMsg.style.color = "#10b981";
             }
         } else {
-            showAuthError(data.detail || "Auth failed");
+            // FIX: Handle structured error from FastAPI
+            let errorMessage = "Auth failed";
+            if (data.detail) {
+                errorMessage = typeof data.detail === 'string' ? data.detail : JSON.stringify(data.detail);
+            }
+            showAuthError(errorMessage);
         }
     } catch (err) {
-        showAuthError("Server connection failed!");
+        showAuthError("Cannot connect to server. Is backend running?");
     }
 }
 
-// --- 3. Chat Logic ---
+// --- 3. Chat Logic (FIXED) ---
 async function handleChat() {
     const message = userInput.value.trim();
     const token = localStorage.getItem("token");
 
     if (!message) return;
     if (!token) {
-        appendMsg("ai-msg", "⚠️ Session expired. Please login.");
+        appendMsg("ai-msg", "⚠️ Session expired. Please login again.");
+        setTimeout(() => { location.reload(); }, 2000);
         return;
     }
 
@@ -101,15 +119,14 @@ async function handleChat() {
         const data = await response.json();
         if (response.ok) {
             appendMsg("ai-msg", data.response);
-            // Refresh graph data if it's currently visible
             if (!moodChartContainer.classList.contains('hidden')) {
                 fetchMoodHistory();
             }
         } else {
-            appendMsg("ai-msg", "⚠️ Error: " + (data.detail || "Server issue"));
+            appendMsg("ai-msg", "⚠️ Error: " + (data.detail || "Something went wrong"));
         }
     } catch (err) {
-        appendMsg("ai-msg", "❌ Connection lost.");
+        appendMsg("ai-msg", "❌ Connection lost with server.");
     } finally {
         if (typingIndicator) typingIndicator.classList.add('hidden');
         scrollChat();
@@ -124,23 +141,33 @@ if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
     micBtn.onclick = () => {
         recognition.start();
         micBtn.classList.add('recording');
+        micBtn.innerText = "🛑 Listening...";
     };
 
     recognition.onresult = (event) => {
         userInput.value = event.results[0][0].transcript;
         micBtn.classList.remove('recording');
+        micBtn.innerText = "🎤";
         handleChat();
     };
 
-    recognition.onerror = () => micBtn.classList.remove('recording');
-    recognition.onend = () => micBtn.classList.remove('recording');
+    recognition.onerror = () => {
+        micBtn.classList.remove('recording');
+        micBtn.innerText = "🎤";
+    };
+
+    recognition.onend = () => {
+        micBtn.classList.remove('recording');
+        micBtn.innerText = "🎤";
+    };
 }
 
-// --- 5. 📈 Mood Graph (Asli Data Connection) ---
+// --- 5. 📈 Mood Graph ---
 async function fetchMoodHistory() {
     const token = localStorage.getItem("token");
+    if (!token) return;
+
     try {
-        // Rizwan, ye hamare naye backend route ko hit karega
         const response = await fetch(`${API_BASE_URL}/chat/history-stats`, {
             headers: { "Authorization": `Bearer ${token}` }
         });
@@ -150,24 +177,20 @@ async function fetchMoodHistory() {
             renderChart(data.labels, data.values);
         }
     } catch (err) {
-        console.error("Failed to fetch history:", err);
+        console.error("Failed to fetch mood history:", err);
     }
 }
 
 function renderChart(labels, values) {
     const ctx = document.getElementById('moodChart').getContext('2d');
-
-    // Agar pehle se chart hai toh destroy kar dein taake naya ban sakay
-    if (moodChart) {
-        moodChart.destroy();
-    }
+    if (moodChart) { moodChart.destroy(); }
 
     moodChart = new Chart(ctx, {
-        type: 'bar', // Bar chart mood counts ke liye best hai
+        type: 'bar',
         data: {
             labels: labels.length > 0 ? labels : ['No Data'],
             datasets: [{
-                label: 'Your Mood Patterns (Last 7 Days)',
+                label: 'Mood Analysis (Last 7 Days)',
                 data: values.length > 0 ? values : [0],
                 backgroundColor: 'rgba(79, 70, 229, 0.6)',
                 borderColor: '#4f46e5',
@@ -183,19 +206,9 @@ function renderChart(labels, values) {
     });
 }
 
-// Toggle Graph visibility
-if (statsBtn) {
-    statsBtn.onclick = () => {
-        moodChartContainer.classList.toggle('hidden');
-        if (!moodChartContainer.classList.contains('hidden')) {
-            fetchMoodHistory();
-        }
-    };
-}
-
 // --- Event Listeners ---
 authBtn.addEventListener('click', handleAuth);
-sendBtn.addEventListener('click', () => handleChat());
+sendBtn.addEventListener('click', handleChat);
 userInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') handleChat(); });
 
 tabLogin.onclick = () => {
@@ -204,6 +217,7 @@ tabLogin.onclick = () => {
     tabRegister.classList.remove('active');
     usernameContainer.classList.add('hidden');
     authBtn.innerText = "Login";
+    authMsg.innerText = "";
 };
 
 tabRegister.onclick = () => {
@@ -212,12 +226,22 @@ tabRegister.onclick = () => {
     tabLogin.classList.remove('active');
     usernameContainer.classList.remove('hidden');
     authBtn.innerText = "Register";
+    authMsg.innerText = "";
 };
 
 logoutBtn.onclick = () => {
     localStorage.clear();
     location.reload();
 };
+
+if (statsBtn) {
+    statsBtn.onclick = () => {
+        moodChartContainer.classList.toggle('hidden');
+        if (!moodChartContainer.classList.contains('hidden')) {
+            fetchMoodHistory();
+        }
+    };
+}
 
 function appendMsg(cls, text) {
     const div = document.createElement('div');
