@@ -3,24 +3,28 @@ import sys
 import os
 from pathlib import Path
 
-# --- 🛠️ Robust Path Handling ---
-# Project root (Rizwan_AI_Project/) ko Python path mein add karna
-BASE_DIR = Path(__file__).resolve().parent.parent.parent
+# --- 🛠️ 1. Robust Path Handling ---
+# Project root (Rizwan AI Companion/) ko Python path mein add karna
+BASE_DIR = Path(__file__).resolve().parent.parent
 if str(BASE_DIR) not in sys.path:
-    sys.path.append(str(BASE_DIR))
+    sys.path.insert(0, str(BASE_DIR))
 
 try:
+    # Database engine aur Base ko backend.database.db se import karna
     from backend.database.db import engine, Base
-    # Models ko register karne ke liye import lazmi hai
+    # Models ko import karna taake SQLAlchemy ko pata ho kaunse tables banane hain
     from backend.database import models 
 except ImportError as e:
-    print(f"❌ Import Error: Make sure you are running from the project root. {e}")
+    print(f"❌ Import Error: Path issue or missing files. {e}")
+    # Local debugging ke liye path print karein
+    print(f"Current Sys Path: {sys.path[0]}")
     sys.exit(1)
 
-# ✅ Ye function app.py dhoond raha hai
+# --- 🛠️ 2. Core Functions ---
+
 async def init_db():
     """
-    Standard function name for backend startup event.
+    Standard function called by app.py during startup.
     """
     await create_tables(reset=False)
 
@@ -35,24 +39,33 @@ async def create_tables(reset=False):
                 await conn.run_sync(Base.metadata.drop_all)
             
             print("🚀 Syncing Database Models...")
+            # Ye line models.py ke saare tables create karegi
             await conn.run_sync(Base.metadata.create_all)
         
-        print("✅ Database tables (Users & ChatHistory) are ready!")
-        print(f"📍 Database File: {BASE_DIR}/rizwan_ai.db")
+        print("✅ Database tables are ready!")
+        # Database path clear dikhane ke liye
+        db_path = os.path.join(BASE_DIR, "rizwan_ai.db")
+        print(f"📍 Database Location: {db_path}")
+        
     except Exception as e:
         print(f"❌ Error during table creation: {e}")
+        # Isay raise karein taake app.py ko pata chale startup fail hua hai
         raise e
 
+# --- 🛠️ 3. Execution Logic ---
+
 if __name__ == "__main__":
-    # --- 💡 Rizwan's Setup Tip ---
-    # Agar tables mein koi column change kiya ho, to isay True kar ke ek baar run karein.
+    # Agar aapne models.py mein koi naya column add kiya hai, to isay True karke run karein
     RESET_DB = False 
     
-    # OS Check for Windows Pro-tip: 
+    # Windows par Loop Policy ka masla hal karne ke liye
     if sys.platform == 'win32':
         asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
+    print("🛠️ Manual Database Setup Tool")
     try:
         asyncio.run(create_tables(reset=RESET_DB))
+    except KeyboardInterrupt:
+        print("\n🛑 Setup interrupted by user.")
     except Exception as e:
-        print(f"❌ Error during manual database setup: {e}")
+        print(f"❌ Failed to setup database manually: {e}")

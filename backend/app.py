@@ -17,27 +17,30 @@ if BASE_DIR not in sys.path:
 app = FastAPI(
     title="Rizwan AI Companion",
     description="An intelligent AI companion with Mood, Emotion, and Personality analysis.",
-    version="1.0.0"
+    version="1.1.0"
 )
 
 # --- 📦 3. Safe Imports & Router Inclusion ---
 init_db_func = None
 try:
-    # backend folder ke andar se init_db.py import karna
+    # Database and Routes Imports
     import backend.init_db as database_initializer
-    from backend.api_routes import chat_routes, auth_routes, analysis_routes
+    from backend.api_routes import chat_routes, auth_routes, analysis_routes, whatsapp_routes
     
+    # DB Init Function Check
     if hasattr(database_initializer, "init_db"):
         init_db_func = database_initializer.init_db
         logger.info("✅ Found 'init_db' function.")
     else:
         logger.warning("⚠️ Could not find 'init_db' function in init_db.py")
 
-    # 🛑 FIX: Yahan se prefixes hata diye hain taake Frontend URLs (jaise /login, /send) kaam karein
+    # Include Routers
     app.include_router(auth_routes.router, tags=["Authentication"]) 
     app.include_router(chat_routes.router, tags=["Chat"])
     app.include_router(analysis_routes.router, tags=["Analysis"])
-    logger.info("✅ All routes (Auth, Chat, Analysis) loaded successfully.")
+    app.include_router(whatsapp_routes.router, tags=["WhatsApp Integration"]) # WhatsApp Added
+    
+    logger.info("✅ All routes (Auth, Chat, Analysis, WhatsApp) loaded successfully.")
 
 except ImportError as e:
     logger.error(f"❌ Import failed: {str(e)}")
@@ -58,7 +61,6 @@ async def on_startup():
     logger.info("🚀 Starting up Rizwan AI Companion...")
     if init_db_func:
         try:
-            # Check if it's a coroutine and await it
             import inspect
             if inspect.iscoroutinefunction(init_db_func):
                 await init_db_func()
@@ -76,10 +78,10 @@ async def root():
     return {
         "message": "Welcome to Rizwan AI Companion API",
         "status": "online",
-        "developer": "Muhammad Rizwan (BSAI)"
+        "developer": "Muhammad Rizwan (AI Enthusiast)"
     }
 
 # 🏃 7. Run Server
 if __name__ == "__main__":
-    # Port 8000 default rakha hai as per your terminal
+    # Ensure the path matches your project structure
     uvicorn.run("backend.app:app", host="127.0.0.1", port=8000, reload=True)
