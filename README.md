@@ -1,7 +1,7 @@
 # 🤖 Rizwan AI Companion
-**An Intelligent Personal AI Assistant with Emotion and Mood Tracking.**
+**An Intelligent Personal AI Assistant with Emotion, Mood Tracking, and WhatsApp Integration.**
 
-A sophisticated AI-driven companion designed to provide personalized interactions, analyze moods, and detect emotions using advanced NLP techniques. This project integrates a modular backend with a clean, responsive frontend.
+A sophisticated AI-driven companion designed to provide personalized interactions, analyze moods, and detect emotions using advanced NLP techniques. This project integrates a modular backend with a clean, responsive frontend and a WhatsApp bot interface.
 
 ---
 
@@ -76,6 +76,7 @@ He is passionate about NLP, Emotional Intelligence in machines, and creating sca
 ## 🔗 Connect with Developer
 * **GitHub:** [rizz01107](https://github.com/rizz01107)
 * **LinkedIn:** [rizz01107](https://www.linkedin.com/in/rizz01107)
+* **Email:** [rizwan01107@gmail.com](mailto:rizwan01107@gmail.com)
 
 ---
  *Developed for research and development in AI-human interaction.*
