@@ -1,4 +1,3 @@
-Markdown
 # 🤖 Rizwan AI Companion
 **An Intelligent Personal AI Assistant with Emotion and Mood Tracking.**
 
