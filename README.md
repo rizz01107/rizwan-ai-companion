@@ -69,4 +69,5 @@ pip install -r requirements.txt
 * **LinkedIn:** [rizz01107](https://www.linkedin.com/in/rizz01107)
 
 ---
-*Developed for research and development in AI-human interaction.*
+ *Developed for research and development in AI-human interaction.*
+---
