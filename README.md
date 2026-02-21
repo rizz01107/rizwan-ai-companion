@@ -1,3 +1,4 @@
+Markdown
 # 🤖 Rizwan AI Companion
 **An Intelligent Personal AI Assistant with Emotion and Mood Tracking.**
 
@@ -28,34 +29,44 @@ A sophisticated AI-driven companion designed to provide personalized interaction
 │   └── script.js       # API Integration & UI Logic
 ├── requirements.txt    # Python Dependencies
 └── .gitignore          # Git exclusion rules
+```
 
-🛠️ Tech Stack
-Languages: Python, JavaScript, SQL
+---
 
-Backend: FastAPI / Flask
+## 🛠️ Tech Stack
+* **Languages:** Python, JavaScript, SQL
+* **Backend:** FastAPI / Flask
+* **Frontend:** HTML5, CSS3, JavaScript
+* **Database:** SQLite / SQLAlchemy
+* **AI/ML:** PyTorch, Transformers, NLP
 
-Frontend: HTML5, CSS3, JavaScript
+---
 
-Database: SQLite / SQLAlchemy
+## 🚀 Installation & Setup
 
-AI/ML: PyTorch, Transformers, NLP
-
-🚀 Installation & Setup
-1. Clone the repository
-Bash
+### 1. Clone the repository
+```bash
 git clone [https://github.com/rizz01107/rizwan-ai-companion.git](https://github.com/rizz01107/rizwan-ai-companion.git)
 cd rizwan-ai-companion
-2. Environment Setup
-Bash
+```
+---
+### 2. Environment Setup
+```bash
 python -m venv venv
 # Activate on Windows:
 venv\Scripts\activate
-3. Install Dependencies
-Bash
+``` 
+---
+
+### 3. Install Dependencies
+```bash
 pip install -r requirements.txt
-🔗 Connect with Developer
-GitHub: rizz01107
+```
+---
 
-LinkedIn: rizz01107
+## 🔗 Connect with Developer
+* **GitHub:** [rizz01107](https://github.com/rizz01107)
+* **LinkedIn:** [rizz01107](https://www.linkedin.com/in/rizz01107)
 
-Developed for research and development in AI-human interaction.
+---
+*Developed for research and development in AI-human interaction.*
