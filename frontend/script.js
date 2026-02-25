@@ -29,6 +29,7 @@ function switchToChat(name) {
     if (authSection) authSection.classList.add('hidden');
     if (chatSection) chatSection.classList.remove('hidden');
     if (displayName) displayName.innerText = name;
+    if (authMsg) authMsg.innerText = "";
     scrollChat();
 }
 
@@ -46,20 +47,25 @@ function speakText(text) {
 // --- 2. Auth Logic ---
 async function handleAuth(e) {
     if (e) e.preventDefault();
-    const email = emailInput.value.trim();
-    const password = passwordInput.value.trim();
-    const username = usernameInput.value.trim();
+
+    if (!authMsg) return; // Safety check
+
+    const email = emailInput ? emailInput.value.trim() : "";
+    const password = passwordInput ? passwordInput.value.trim() : "";
+    const username = usernameInput ? usernameInput.value.trim() : "";
 
     if (!email || !password || (!isLoginMode && !username)) {
-        showAuthError("Please fill all fields!");
+        showAuthError("⚠️ Please fill all required fields!");
         return;
     }
 
-    const payload = isLoginMode ? { email, password } : { username, email, password };
+    const payload = isLoginMode ? { email: email, password: password } : { username: username, email: email, password: password };
     const endpoint = isLoginMode ? "/auth/login" : "/auth/register";
 
     try {
-        authMsg.innerText = "Processing...";
+        authMsg.style.color = "#4f46e5";
+        authMsg.innerText = "⏳ Processing...";
+
         const response = await fetch(`${API_BASE_URL}${endpoint}`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -67,21 +73,32 @@ async function handleAuth(e) {
         });
 
         const data = await response.json();
+
         if (response.ok) {
+            authMsg.innerText = "";
             if (isLoginMode) {
                 localStorage.setItem("token", data.access_token);
-                localStorage.setItem("username", data.username || "User");
-                switchToChat(data.username || "User");
+                localStorage.setItem("username", data.username || email.split('@')[0]);
+                switchToChat(data.username || email.split('@')[0]);
             } else {
-                alert("Account created! Please login.");
+                alert("✅ Account created successfully! Please login.");
                 isLoginMode = true;
-                tabLogin.click();
+                if (tabLogin) tabLogin.click();
             }
         } else {
-            showAuthError(data.detail || "Auth failed");
+            let errorMsg = "❌ Auth failed. Check credentials.";
+            if (data.detail) {
+                if (Array.isArray(data.detail)) {
+                    errorMsg = "❌ Validation Error: Please check input formats.";
+                } else {
+                    errorMsg = "❌ " + data.detail;
+                }
+            }
+            showAuthError(errorMsg);
         }
     } catch (err) {
-        showAuthError("Server connection failed!");
+        console.error("Auth Error:", err);
+        showAuthError("🚫 Server connection failed! Is backend running?");
     }
 }
 
@@ -94,7 +111,7 @@ async function handleChat() {
 
     if (!message) return;
     if (!token) {
-        appendMsg("ai-msg", "⚠️ Session expired. Please login.");
+        appendMsg("ai-msg", "⚠️ Session expired. Please login again.");
         return;
     }
 
@@ -104,27 +121,20 @@ async function handleChat() {
     if (typingIndicator) typingIndicator.classList.remove('hidden');
     scrollChat();
 
-    // --- 🔍 SMART LOGIC START ---
+    // --- 🔍 SMART DETECTION LOGIC ---
     const lowerMsg = message.toLowerCase();
-
-    // In lafzon par image BN'NI chahiye (Generation)
     const genKeywords = ["generate", "create", "make", "bnao", "bnnao", "tasveer do", "draw", "paint", "photo of"];
-    const userWantsToCreate = genKeywords.some(word => lowerMsg.includes(word));
+    const personalKeywords = ["personality", "mera character", "image kesi hai", "image kaisa hai", "batao", "describe"];
 
-    // In lafzon par sirf DESCRIPTION (Lafzon mein personality)
-    const personalKeywords = ["personality", "mera character", "image kesi hai", "image kaisa hai", "batao", "describe", "kesa hun"];
-    const isDescriptiveRequest = personalKeywords.some(word => lowerMsg.includes(word));
+    const isImageRequest = genKeywords.some(word => lowerMsg.includes(word)) &&
+        !personalKeywords.some(word => lowerMsg.includes(word));
 
-    // Agar user "banao" kahe toh true, agar sirf "kesi hai" kahe toh false
-    const isImageRequest = userWantsToCreate && !isDescriptiveRequest;
-
-    // Voice support check
     const voiceKeywords = ["speak", "bolo", "batao", "sunao", "awaz", "talk"];
     const userWantsToHear = voiceKeywords.some(word => lowerMsg.includes(word));
-    // --- 🔍 SMART LOGIC END ---
 
     try {
-        const response = await fetch(`${API_BASE_URL}/chat/send`, {
+        // UPDATED: Added /api prefix to match your backend app.py routing
+        const response = await fetch(`${API_BASE_URL}/api/chat/send`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -136,14 +146,19 @@ async function handleChat() {
             })
         });
 
+        if (response.status === 401) {
+            localStorage.clear();
+            appendMsg("ai-msg", "⚠️ Session expired. Redirecting to login...");
+            setTimeout(() => location.reload(), 2000);
+            return;
+        }
+
         const data = await response.json();
         if (response.ok) {
-            // Humesha text response dikhayen
             appendMsg("ai-msg", data.response);
 
-            // Image sirf tabhi jab isImageRequest true ho aur URL mile
             if (data.image_url && isImageRequest) {
-                appendImage(data.image_url);
+                await appendImage(data.image_url);
             }
 
             if (userWantsToHear) {
@@ -157,7 +172,8 @@ async function handleChat() {
             appendMsg("ai-msg", "⚠️ Error: " + (data.detail || "Server issue"));
         }
     } catch (err) {
-        appendMsg("ai-msg", "❌ Connection lost.");
+        console.error("Chat Error:", err);
+        appendMsg("ai-msg", "❌ Connection lost. Check backend.");
     } finally {
         isProcessing = false;
         if (typingIndicator) typingIndicator.classList.add('hidden');
@@ -169,28 +185,44 @@ async function handleChat() {
 if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
     const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
     recognition.lang = 'en-US';
+    recognition.continuous = false;
+    recognition.interimResults = false;
 
-    micBtn.onclick = () => {
-        recognition.start();
-        micBtn.classList.add('recording');
-        micBtn.innerText = "🛑 Listening...";
-    };
+    if (micBtn) {
+        micBtn.onclick = () => {
+            try {
+                recognition.start();
+                micBtn.classList.add('recording');
+                micBtn.innerText = "🛑 Listening...";
+            } catch (e) {
+                recognition.stop();
+            }
+        };
+    }
 
     recognition.onresult = (event) => {
-        userInput.value = event.results[0][0].transcript;
-        micBtn.classList.remove('recording');
-        micBtn.innerText = "🎤";
+        const transcript = event.results[0][0].transcript;
+        if (userInput) userInput.value = transcript;
+        if (micBtn) {
+            micBtn.classList.remove('recording');
+            micBtn.innerText = "🎤";
+        }
         handleChat();
     };
 
-    recognition.onerror = () => {
-        micBtn.classList.remove('recording');
-        micBtn.innerText = "🎤";
+    recognition.onerror = (event) => {
+        console.error("Speech Error:", event.error);
+        if (micBtn) {
+            micBtn.classList.remove('recording');
+            micBtn.innerText = "🎤";
+        }
     };
 
     recognition.onend = () => {
-        micBtn.classList.remove('recording');
-        micBtn.innerText = "🎤";
+        if (micBtn) {
+            micBtn.classList.remove('recording');
+            micBtn.innerText = "🎤";
+        }
     };
 }
 
@@ -199,7 +231,7 @@ async function fetchMoodHistory() {
     const token = localStorage.getItem("token");
     if (!token) return;
     try {
-        const response = await fetch(`${API_BASE_URL}/chat/history-stats`, {
+        const response = await fetch(`${API_BASE_URL}/api/chat/history-stats`, {
             headers: { "Authorization": `Bearer ${token}` }
         });
         const data = await response.json();
@@ -212,15 +244,19 @@ async function fetchMoodHistory() {
 }
 
 function renderChart(labels, values) {
-    const ctx = document.getElementById('moodChart').getContext('2d');
+    const chartCanvas = document.getElementById('moodChart');
+    if (!chartCanvas) return;
+
+    const ctx = chartCanvas.getContext('2d');
     if (moodChart) { moodChart.destroy(); }
+
     moodChart = new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: labels.length > 0 ? labels : ['No Data'],
+            labels: labels && labels.length > 0 ? labels : ['No Data'],
             datasets: [{
                 label: 'Mood Analysis (Last 7 Days)',
-                data: values.length > 0 ? values : [0],
+                data: values && values.length > 0 ? values : [0],
                 backgroundColor: 'rgba(79, 70, 229, 0.6)',
                 borderColor: '#4f46e5',
                 borderWidth: 1,
@@ -230,14 +266,22 @@ function renderChart(labels, values) {
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { stepSize: 1, precision: 0 }
+                }
+            },
+            plugins: {
+                legend: { display: true, position: 'top' }
+            }
         }
     });
 }
 
 // --- 🛠️ Helper Functions ---
-
 function appendMsg(cls, text) {
+    if (!chatBox) return;
     const div = document.createElement('div');
     div.className = `msg ${cls} fade-in`;
     div.innerText = text;
@@ -246,14 +290,15 @@ function appendMsg(cls, text) {
 }
 
 async function appendImage(url) {
+    if (!chatBox) return;
     const imgDiv = document.createElement('div');
     imgDiv.className = "msg ai-msg fade-in image-msg";
     const imgId = `ai-img-${Date.now()}`;
 
     imgDiv.innerHTML = `
-        <div style="margin-top: 10px; width: 100%; min-height: 200px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #f3f4f6; border-radius: 12px; border: 1px dashed #4f46e5;" id="${imgId}-container">
-            <div id="${imgId}-loader" style="border: 3px solid #f3f3f3; border-top: 3px solid #4f46e5; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite;"></div>
-            <p id="${imgId}-status" style="font-size: 0.8rem; color: #4f46e5; margin-top: 12px; font-weight: bold; text-align: center;">🎨 AI is painting your request...</p>
+        <div style="margin-top: 10px; width: 100%; min-height: 250px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #f3f4f6; border-radius: 12px; border: 1px dashed #4f46e5;" id="${imgId}-container">
+            <div id="${imgId}-loader" class="spinner" style="border: 4px solid #f3f3f3; border-top: 4px solid #4f46e5; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite;"></div>
+            <p id="${imgId}-status" style="font-size: 0.85rem; color: #4f46e5; margin-top: 15px; font-weight: 600; text-align: center;">🎨 Creating your art...</p>
         </div>
         <style> @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } } </style>
     `;
@@ -266,7 +311,7 @@ async function appendImage(url) {
     const loader = document.getElementById(`${imgId}-loader`);
 
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 25000);
+    const timeoutId = setTimeout(() => controller.abort(), 90000);
 
     try {
         const response = await fetch(url, { signal: controller.signal });
@@ -274,80 +319,101 @@ async function appendImage(url) {
             const blob = await response.blob();
             const objectUrl = URL.createObjectURL(blob);
 
-            loader.remove();
-            status.remove();
+            if (loader) loader.remove();
+            if (status) status.remove();
+
             container.style.minHeight = "auto";
             container.style.background = "transparent";
             container.style.border = "none";
 
             const img = document.createElement('img');
             img.src = objectUrl;
-            img.style.cssText = "width: 100%; max-width: 350px; border-radius: 12px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); display: block;";
+            img.className = "generated-art";
+            img.style.cssText = "width: 100%; max-width: 400px; border-radius: 12px; box-shadow: 0 10px 20px rgba(0,0,0,0.15); display: block;";
 
             container.appendChild(img);
 
             const dBtn = document.createElement('button');
-            dBtn.innerHTML = "📥 Save Art";
-            dBtn.style.cssText = "margin-top: 12px; padding: 8px 20px; background: #4f46e5; color: white; border: none; border-radius: 25px; font-size: 0.75rem; cursor: pointer; font-weight: bold;";
+            dBtn.innerHTML = "📥 Download Masterpiece";
+            dBtn.className = "download-btn";
+            dBtn.style.cssText = "margin-top: 15px; padding: 10px 25px; background: #4f46e5; color: white; border: none; border-radius: 30px; font-size: 0.8rem; cursor: pointer; font-weight: bold; transition: transform 0.2s;";
             dBtn.onclick = () => {
                 const link = document.createElement('a');
                 link.href = objectUrl;
-                link.download = `AI_Gen_${Date.now()}.png`;
+                link.download = `Rizwan_AI_Art_${Date.now()}.png`;
                 link.click();
             };
             container.appendChild(dBtn);
-        } else { throw new Error(); }
+        } else { throw new Error("Fetch failed"); }
     } catch (e) {
-        loader.remove();
-        status.innerHTML = `<span style="color: #ef4444;">❌ Server busy.</span><br><a href="${url}" target="_blank" style="color: #4f46e5; font-size: 0.75rem; text-decoration: underline;">Open direct link</a>`;
+        if (loader) loader.remove();
+        if (status) status.innerHTML = `<span style="color: #ef4444;">❌ AI Artist is busy.</span><br><a href="${url}" target="_blank" style="color: #4f46e5; font-size: 0.8rem; text-decoration: underline; margin-top: 5px; display: inline-block;">View direct link</a>`;
     } finally {
         clearTimeout(timeoutId);
         scrollChat();
     }
 }
 
-function scrollChat() { chatBox.scrollTop = chatBox.scrollHeight; }
+function scrollChat() {
+    if (chatBox) chatBox.scrollTo({ top: chatBox.scrollHeight, behavior: 'smooth' });
+}
 
 function showAuthError(msg) {
-    authMsg.innerText = msg;
-    authMsg.style.color = "#ef4444";
+    if (authMsg) {
+        authMsg.innerText = msg;
+        authMsg.style.color = "#ef4444";
+        authMsg.classList.add('shake');
+        setTimeout(() => authMsg.classList.remove('shake'), 500);
+    }
 }
 
 // --- Event Listeners ---
-authBtn.addEventListener('click', handleAuth);
-sendBtn.addEventListener('click', handleChat);
-userInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') handleChat(); });
+if (authBtn) authBtn.addEventListener('click', handleAuth);
+if (sendBtn) sendBtn.addEventListener('click', handleChat);
+if (userInput) userInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') handleChat(); });
 
-tabLogin.onclick = () => {
-    isLoginMode = true;
-    tabLogin.classList.add('active');
-    tabRegister.classList.remove('active');
-    usernameContainer.classList.add('hidden');
-    authBtn.innerText = "Login";
-};
+if (tabLogin) {
+    tabLogin.onclick = () => {
+        isLoginMode = true;
+        tabLogin.classList.add('active');
+        if (tabRegister) tabRegister.classList.remove('active');
+        if (usernameContainer) usernameContainer.classList.add('hidden');
+        if (authBtn) authBtn.innerText = "Login";
+        if (authMsg) authMsg.innerText = "";
+    };
+}
 
-tabRegister.onclick = () => {
-    isLoginMode = false;
-    tabRegister.classList.add('active');
-    tabLogin.classList.remove('active');
-    usernameContainer.classList.remove('hidden');
-    authBtn.innerText = "Register";
-};
+if (tabRegister) {
+    tabRegister.onclick = () => {
+        isLoginMode = false;
+        tabRegister.classList.add('active');
+        if (tabLogin) tabLogin.classList.remove('active');
+        if (usernameContainer) usernameContainer.classList.remove('hidden');
+        if (authBtn) authBtn.innerText = "Create Account";
+        if (authMsg) authMsg.innerText = "";
+    };
+}
 
-logoutBtn.onclick = () => {
-    localStorage.clear();
-    location.reload();
-};
+if (logoutBtn) {
+    logoutBtn.onclick = () => {
+        localStorage.clear();
+        location.reload();
+    };
+}
 
 if (statsBtn) {
     statsBtn.onclick = () => {
-        moodChartContainer.classList.toggle('hidden');
-        if (!moodChartContainer.classList.contains('hidden')) fetchMoodHistory();
+        if (moodChartContainer) {
+            const isHidden = moodChartContainer.classList.toggle('hidden');
+            if (!isHidden) fetchMoodHistory();
+        }
     };
 }
 
 window.onload = () => {
-    const t = localStorage.getItem("token");
-    const u = localStorage.getItem("username");
-    if (t && u) switchToChat(u);
+    const token = localStorage.getItem("token");
+    const username = localStorage.getItem("username");
+    if (token && username) {
+        switchToChat(username);
+    }
 };

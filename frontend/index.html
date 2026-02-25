@@ -15,30 +15,40 @@
 
     <div class="main-container">
         <div id="auth-section" class="card fade-in">
-            <h2>Welcome to Rizwan AI 🤖</h2>
-            <div class="tabs">
-                <button id="tab-login" class="active">Login</button>
-                <button id="tab-register">Register</button>
+            <h2 style="text-align: center; margin-bottom: 20px; color: #4f46e5;">Rizwan AI 🤖</h2>
+
+            <div class="auth-tabs">
+                <button id="tab-login" class="tab active">Login</button>
+                <button id="tab-register" class="tab">Register</button>
             </div>
 
-            <div id="auth-form" class="form-container">
-                <div id="username-container" class="hidden">
-                    <input type="text" id="username" placeholder="Full Name" class="input-field">
+            <form id="auth-form" class="auth-form" onsubmit="event.preventDefault();">
+                <div id="username-container" class="input-group hidden">
+                    <input type="text" id="username" placeholder="Full Name" autocomplete="name">
                 </div>
-                <input type="email" id="email" placeholder="Email Address" class="input-field">
-                <input type="password" id="password" placeholder="Password" class="input-field">
-                <button id="auth-btn">Sign In</button>
-            </div>
-            <p id="auth-msg"></p>
+
+                <div class="input-group">
+                    <input type="email" id="email" placeholder="Email Address" autocomplete="email" required>
+                </div>
+
+                <div class="input-group">
+                    <input type="password" id="password" placeholder="Password" autocomplete="current-password"
+                        required>
+                </div>
+
+                <button type="submit" id="auth-btn">Sign In</button>
+            </form>
+
+            <p id="auth-msg" style="text-align: center; margin-top: 15px; min-height: 20px;"></p>
         </div>
 
         <div id="chat-section" class="card chat-card hidden">
             <header>
                 <div class="user-info">
-                    <div class="avatar">R</div>
+                    <div class="avatar" id="avatar-initial">R</div>
                     <div class="details">
-                        <span id="display-name">User</span>
-                        <div class="online-status">
+                        <span id="display-name" style="font-weight: 600; display: block;">Muhammad Rizwan</span>
+                        <div class="online-status" style="font-size: 0.75rem; color: #10b981;">
                             <span class="status-dot"></span> Online
                         </div>
                     </div>
@@ -53,20 +63,25 @@
                 </div>
             </header>
 
-            <div id="mood-chart-container" class="hidden">
-                <canvas id="moodChart"></canvas>
+            <div id="mood-chart-container" class="hidden"
+                style="padding: 15px; background: #f9fafb; border-bottom: 1px solid #e5e7eb;">
+                <div style="height: 200px; width: 100%;">
+                    <canvas id="moodChart"></canvas>
+                </div>
             </div>
 
             <div id="chat-box">
                 <div class="msg ai-msg">
-                    Hello Muhammad Rizwan! I'm your AI Companion. I can analyze your mood and feelings. How are you
-                    today?
+                    Hello! I'm your AI Companion. I can analyze your mood and even paint pictures for you. How are you
+                    feeling today?
                 </div>
             </div>
 
             <div id="typing" class="hidden">
                 <div class="typing-bubble">
-                    <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                    <span class="dot"></span>
+                    <span class="dot"></span>
+                    <span class="dot"></span>
                 </div>
             </div>
 
@@ -75,7 +90,7 @@
                     <i class="fas fa-microphone"></i>
                 </button>
 
-                <input type="text" id="user-input" placeholder="Type or speak here..." autocomplete="off" />
+                <input type="text" id="user-input" placeholder="Message Rizwan AI..." autocomplete="off" />
 
                 <button id="send-btn">
                     <i class="fas fa-paper-plane"></i>

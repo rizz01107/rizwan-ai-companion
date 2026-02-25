@@ -1,31 +1,35 @@
 # 🤖 Rizwan AI Companion
 **An Intelligent Personal AI Assistant with Emotion, Mood Tracking, and WhatsApp Integration.**
 
-A sophisticated AI-driven companion designed to provide personalized interactions, analyze moods, and detect emotions using advanced NLP techniques. This project integrates a modular backend with a clean, responsive frontend and a WhatsApp bot interface.
+[![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi)](https://fastapi.tiangolo.com/)
+[![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
+[![Twilio](https://img.shields.io/badge/Twilio-F22F46?style=for-the-badge&logo=twilio&logoColor=white)](https://www.twilio.com/)
+
+A sophisticated AI-driven companion designed to provide personalized interactions, analyze moods, and detect emotions using advanced NLP techniques. This project integrates a modular FastAPI backend with a clean, responsive frontend and a WhatsApp bot interface.
 
 ---
 
 ## 🌟 Key Features
-* **Emotion Detection:** Real-time analysis of user input to understand emotional states.
-* **Mood Tracking:** Historical tracking of user moods for long-term personality insights.
-* **AI Engine (Brain):** Context-aware conversation logic with integrated memory.
-* **Secure Auth:** User registration and login for personalized data management.
-* **Database Integration:** Reliable storage for chat history and user profiles.
+* **🧠 Brain Engine:** Context-aware conversation logic with integrated short-term and long-term memory.
+* **🎭 Emotion & Mood Analysis:** Real-time analysis of user input to track emotional states over time.
+* **📊 Dynamic Insights:** Interactive Mood History graphs using Chart.js for personality insights.
+* **🎨 AI Image Generation:** Integrated Image-Gen capabilities to turn text descriptions into art.
+* **📲 WhatsApp Integration:** Seamlessly chat with your AI companion via Twilio WhatsApp API.
+* **🔐 Secure Auth:** JWT-based user registration and login for personalized data management.
 
 ---
 
 ## 📂 Project Structure
 ```text
 ├── backend/
-│   ├── ai_engine/      # Core AI Logic (Brain & Memory)
-│   ├── api_routes/     # API Endpoints (Auth, Chat, Analysis)
-│   ├── database/       # DB Models and SQLite Connection
-│   ├── models/         # ML Models for Emotion & Mood
-│   └── app.py          # Main Server Entry Point
+│   ├── ai_engine/      # Core AI Logic (Brain, Memory & Image Gen)
+│   ├── api_routes/     # API Endpoints (Auth, Chat, WhatsApp, Stats)
+│   ├── database/       # SQLAlchemy Models and DB Connection
+│   └── app.py          # Main FastAPI Server Entry Point
 ├── frontend/
-│   ├── index.html      # Project UI
-│   ├── style.css       # Custom Styling
-│   └── script.js       # API Integration & UI Logic
+│   ├── index.html      # Main Dashboard UI
+│   ├── style.css       # Modern Dark/Light Mode Styling
+│   └── script.js       # API Integration & Chart.js Logic
 ├── requirements.txt    # Python Dependencies
 └── .gitignore          # Git exclusion rules
 ```
@@ -33,11 +37,13 @@ A sophisticated AI-driven companion designed to provide personalized interaction
 ---
 
 ## 🛠️ Tech Stack
-* **Languages:** Python, JavaScript, SQL
-* **Backend:** FastAPI / Flask
-* **Frontend:** HTML5, CSS3, JavaScript
-* **Database:** SQLite / SQLAlchemy
-* **AI/ML:** PyTorch, Transformers, NLP
+
+* **Languages:** `Python` (Backend), `JavaScript` (Frontend), `SQL` (Database)
+* **Backend:** `FastAPI` (High-performance asynchronous execution)
+* **Frontend:** `HTML5`, `CSS3`, `JavaScript` (Vanilla), `Chart.js` (For Mood Visualizations)
+* **Database:** `SQLite` / `PostgreSQL` (Managed via `SQLAlchemy ORM`)
+* **Communication:** `Twilio Messaging API` (For WhatsApp Integration)
+* **AI/ML:** `Generative AI (LLMs)`, `NLP` (Emotion & Mood Analysis)
 
 ---
 

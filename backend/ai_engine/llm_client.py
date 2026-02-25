@@ -1,110 +1,108 @@
 import logging
 import os
+import asyncio
+from typing import Optional
 from dotenv import load_dotenv
-from groq import Groq
-from time import sleep
+from groq import AsyncGroq
 
 # --------------------------------------------------
-# Load Environment Variables
+# 1. Configuration & Logging
 # --------------------------------------------------
 load_dotenv()
 logger = logging.getLogger(__name__)
 
-# Basic logging setup check
 if not logger.hasHandlers():
     logging.basicConfig(level=logging.INFO)
 
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
 # --------------------------------------------------
-# Initialize Groq Client
+# 2. Initialize Async Groq Client
 # --------------------------------------------------
-try:
-    if not GROQ_API_KEY:
-        logger.error("❌ GROQ_API_KEY missing in .env file!")
-        client = None
-    else:
-        client = Groq(api_key=GROQ_API_KEY)
-        logger.info("✅ Groq API configured successfully with 2026 Stable Models.")
-except Exception as e:
-    logger.error(f"❌ Failed to initialize Groq Client: {e}")
-    client = None
+client = None
 
+def init_client():
+    """Helper to initialize client without proxy conflicts"""
+    global client
+    try:
+        if not GROQ_API_KEY:
+            logger.error("❌ CRITICAL: GROQ_API_KEY is missing in your .env file!")
+            return None
+        # Standard initialization for 2026 stable environments
+        return AsyncGroq(api_key=GROQ_API_KEY)
+    except Exception as e:
+        logger.error(f"❌ Failed to initialize Groq Client: {e}")
+        return None
+
+client = init_client()
 
 # --------------------------------------------------
-# Model Priority List (Strictly 2026 Stable IDs)
+# 3. Model Priority
 # --------------------------------------------------
-# Rizwan, purane Llama3 models decommission ho chuke hain, 
-# isliye hum ye latest IDs use kar rahe hain.
 MODEL_PRIORITY = [
-    "llama-3.3-70b-versatile",   # 🧠 Sabse smart model
-    "llama-3.1-8b-instant",      # ⚡ Sabse fast model
-    "mixtral-8x7b-32768"         # 🔗 Backup model
+    "llama-3.3-70b-versatile", 
+    "llama-3.1-8b-instant",    
+    "mixtral-8x7b-32768"       
 ]
 
-
 # --------------------------------------------------
-# LLM Generator Function
+# 4. Core Generator Function (Async)
 # --------------------------------------------------
-def generate_llm(prompt: str) -> str:
-    if not client:
-        return "AI Client not initialized. Please check your Groq API key."
+async def generate_llm(structured_prompt: str) -> str:
+    """
+    Asynchronously generates a response from Groq with automatic model fallback.
+    """
+    global client
+    
+    # Lazy initialization if first attempt failed
+    if client is None:
+        client = init_client()
+        if client is None:
+            return "❌ Error: AI Engine not initialized. Check API Key."
 
-    if not prompt or not prompt.strip():
-        return "Prompt cannot be empty."
+    if not structured_prompt or not structured_prompt.strip():
+        return "⚠️ Error: The AI received an empty prompt."
 
-    last_error = "Unknown Error"
+    last_error = "Unknown Connection Error"
 
-    # Loop through models to find an available one
     for model_id in MODEL_PRIORITY:
         try:
-            logger.info(f"🔄 Trying Groq model: {model_id}")
+            logger.info(f"🔄 Processing request with model: {model_id}")
 
-            response = client.chat.completions.create(
+            response = await client.chat.completions.create(
                 model=model_id,
                 messages=[
                     {
-                        "role": "system", 
-                        "content": "You are Rizwan's AI Companion. Answer concisely and professionally."
-                    },
-                    {"role": "user", "content": prompt}
+                        "role": "user", 
+                        "content": structured_prompt
+                    }
                 ],
-                temperature=0.7,
-                max_tokens=512
+                temperature=0.65,
+                max_tokens=1024,
+                top_p=0.9
             )
 
-            # Agar response mil jaye toh return karein
-            if response and response.choices and response.choices[0].message.content:
-                content = response.choices[0].message.content.strip()
-                logger.info(f"✅ Success with model: {model_id}")
-                return content
-
-            logger.warning(f"⚠️ Model {model_id} returned an empty response.")
-            continue
+            if response.choices and response.choices[0].message.content:
+                ai_text = response.choices[0].message.content.strip()
+                logger.info(f"✅ Successfully generated response using {model_id}")
+                return ai_text
 
         except Exception as e:
-            error_msg = str(e).lower()
-            last_error = error_msg
+            error_str = str(e).lower()
+            last_error = error_str
             
-            # 1. Rate Limit Handling (429)
-            if "429" in error_msg or "rate_limit" in error_msg:
-                logger.error(f"❌ Rate limit hit for {model_id}. Sleeping 1s...")
-                sleep(1) # Chota sa break taake agla model chal sake
+            # Rate Limit Handling
+            if "429" in error_str or "rate_limit" in error_str:
+                logger.warning(f"⚠️ Rate limit hit for {model_id}. Switching...")
+                await asyncio.sleep(0.5) 
                 continue
             
-            # 2. Authentication / Invalid Key (401)
-            if "401" in error_msg or "authentication" in error_msg:
-                logger.error("❌ API Key is invalid!")
-                return "❌ API Key Error: Please update your Groq Key."
+            # Auth Error
+            if "401" in error_str:
+                logger.error("❌ Authentication Failed: Invalid Groq API Key.")
+                return "❌ AI Authentication Error: Please check backend configuration."
 
-            # 3. Model Retired / Decommissioned (400)
-            if "decommissioned" in error_msg or "not found" in error_msg:
-                logger.error(f"❌ Model {model_id} is no longer available.")
-                continue
-
-            # 4. Connection Issues
-            logger.error(f"❌ Error with {model_id}: {error_msg}")
+            logger.error(f"❌ Error with {model_id}: {error_str}")
             continue
 
-    # Agar koi bhi model kaam na kare
-    return f"⚠️ All models failed. Last Error: {last_error[:50]}..."
+    return f"⚠️ I'm temporarily unavailable. (Reason: {last_error[:60]}...)"

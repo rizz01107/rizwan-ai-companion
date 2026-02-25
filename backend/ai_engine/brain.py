@@ -1,6 +1,7 @@
 import logging
 import os
-from typing import Optional
+import asyncio
+from typing import Optional, Dict, Any
 
 # Logging setup
 logging.basicConfig(level=logging.INFO)
@@ -11,92 +12,97 @@ logger = logging.getLogger(__name__)
 # --------------------------------------------------
 try:
     from backend.models.mood_analyzer import predict_mood
-    from backend.models.emotion_detector import detect_emotion
-    from backend.models.personality_analyzer import analyze_personality
+    # Fallbacks for missing models to prevent crash
+    try:
+        from backend.models.emotion_detector import detect_emotion
+    except ImportError:
+        def detect_emotion(x): return "calm"
+        
+    try:
+        from backend.models.personality_analyzer import analyze_personality
+    except ImportError:
+        def analyze_personality(x): return "friendly"
+        
     from backend.ai_engine.llm_client import generate_llm
 except ImportError as e:
-    logger.warning(f"⚠️ Models missing, using fallbacks. Error: {e}")
-    
-    # Placeholder functions taake code crash na ho
-    predict_mood = lambda x: "neutral"
+    logger.warning(f"⚠️ Modules missing, using fallbacks. Error: {e}")
+    predict_mood = lambda x: ("Neutral", 0.0)
     detect_emotion = lambda x: "calm"
     analyze_personality = lambda x: "friendly"
-    
-    try:
-        from backend.ai_engine.llm_client import generate_llm
-    except ImportError:
-        def generate_llm(p): return "Error: LLM Client (Groq/Gemini) not found."
+    async def generate_llm(p): return "AI model is currently unavailable."
 
 class AIBrain:
     def __init__(self):
         self.name = "Rizwan AI Companion"
-        # Rizwan, ye variables database mein stats save karne ke liye lazmi hain
-        self.last_mood = "neutral"
-        self.last_emotion = "calm"
-        self.last_personality = "friendly"
 
-    def process_user_input(self, text: str, context: str = "") -> str:
+    async def process_user_input(self, text: str, context: str = "") -> Dict[str, Any]:
         """
-        User ke input ko analyze karke personalized response banata hai.
+        Asynchronously analyzes input and returns a Dictionary with response and tags.
         """
         if not text or len(text.strip()) == 0:
-            return "I'm listening, but I didn't get any text. What's on your mind?"
+            return {
+                "ai_response": "I'm listening, but I didn't get any text.",
+                "mood": "Neutral", "emotion": "calm", "personality": "friendly"
+            }
 
         try:
-            # --- 1. AI Analysis Phase ---
-            # Hum user ka mood detect karke class variables mein save kar rahe hain
+            # --- 1. AI Analysis Phase (Sync Models) ---
             try:
                 mood_res = predict_mood(text)
-                self.last_mood = mood_res[0] if isinstance(mood_res, (tuple, list)) else mood_res
-            except: 
-                self.last_mood = "neutral"
+                current_mood = mood_res[0] if isinstance(mood_res, (tuple, list)) else mood_res
+            except: current_mood = "Neutral"
 
             try:
-                self.last_emotion = detect_emotion(text)
-            except: 
-                self.last_emotion = "thoughtful"
+                current_emotion = detect_emotion(text)
+            except: current_emotion = "thoughtful"
 
             try:
-                self.last_personality = analyze_personality(text)
-            except: 
-                self.last_personality = "empathetic"
+                current_personality = analyze_personality(text)
+            except: current_personality = "empathetic"
 
             # --- 2. Advanced Prompt Engineering ---
-            # AI ko context dena ke user kis haal mein hai
-            system_meta = (
-                f"Your name is {self.name}. You are a supportive AI. "
-                f"Detected User State: Mood={self.last_mood}, Emotion={self.last_emotion}. "
-                "Instructions: Be highly empathetic, concise, and professional. "
-                "Maintain a natural flow like a human companion."
+            system_instruction = (
+                f"Your name is {self.name}. You are the loyal AI Companion of Muhammad Rizwan. "
+                f"Detected User State: Mood={current_mood}, Emotion={current_emotion}. "
+                "Instructions: Be empathetic, concise, and friendly. "
+                "Maintain memory of the previous context provided."
             )
 
-            history_str = f"\n[Previous Conversations]:\n{context}\n" if context else ""
-            
             final_prompt = (
-                f"SYSTEM: {system_meta}\n"
-                f"{history_str}"
+                f"SYSTEM: {system_instruction}\n"
+                f"HISTORY:\n{context}\n"
                 f"USER: {text}\n"
-                f"AI:"
+                f"AI RESPONSE:"
             )
 
-            # --- 3. Generate Response ---
-            logger.info(f"🧠 Brain analyzing: Mood={self.last_mood}, Emotion={self.last_emotion}")
-            response = generate_llm(final_prompt)
+            # --- 3. Generate Response (Async Call) ---
+            logger.info(f"🧠 Brain analyzing: Mood={current_mood}, Emotion={current_emotion}")
+            
+            # This must be awaited because generate_llm is async
+            ai_response = await generate_llm(final_prompt)
 
-            if not response:
-                return "I'm processing a lot right now. Could you repeat that?"
+            if not ai_response:
+                ai_response = "I'm processing a lot right now. Could you repeat that?"
 
-            return response
+            return {
+                "ai_response": ai_response,
+                "mood": current_mood,
+                "emotion": current_emotion,
+                "personality": current_personality
+            }
 
         except Exception as e:
             logger.error(f"❌ Critical Brain Error: {str(e)}")
-            return "I'm having a little trouble thinking clearly. Let's try again."
+            return {
+                "ai_response": "I'm having trouble thinking clearly. Let's try again.",
+                "mood": "Neutral", "emotion": "error", "personality": "friendly"
+            }
 
 # --- Singleton Instance ---
 brain = AIBrain()
 
-def generate_ai(text: str, context: str = "") -> str:
+async def generate_ai(text: str, context: str = "") -> Dict[str, Any]:
     """
-    Main helper function used by chat_routes.py
+    Asynchronous helper function for routes.
     """
-    return brain.process_user_input(text, context)
+    return await brain.process_user_input(text, context)

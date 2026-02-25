@@ -1,5 +1,16 @@
+# Environments
 venv/
+env/
+
+# Secret Files
 .env
-__pycache__/
+
+# Database
 *.db
+
+# Python Cache
+__pycache__/
 *.pyc
+
+# Binaries
+ngrok.exe
