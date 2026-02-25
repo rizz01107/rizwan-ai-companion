@@ -1,12 +1,17 @@
 # 🤖 Rizwan AI Companion
 **An Intelligent Personal AI Assistant with Emotion, Mood Tracking, and WhatsApp Integration.**
 
+![AI Engine](https://img.shields.io/badge/AI-Generative--AI-blueviolet)
+![Mood Tracking](https://img.shields.io/badge/Mood-Tracking-orange)
+![Status](https://img.shields.io/badge/Status-Active-brightgreen)
+
 [![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi)](https://fastapi.tiangolo.com/)
 [![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
 [![Twilio](https://img.shields.io/badge/Twilio-F22F46?style=for-the-badge&logo=twilio&logoColor=white)](https://www.twilio.com/)
 
-A sophisticated AI-driven companion designed to provide personalized interactions, analyze moods, and detect emotions using advanced NLP techniques. This project integrates a modular FastAPI backend with a clean, responsive frontend and a WhatsApp bot interface.
+---
 
+A sophisticated AI-driven companion designed to provide personalized interactions, analyze moods, and detect emotions using advanced NLP techniques. This project integrates a modular FastAPI backend with a clean, responsive frontend and a WhatsApp bot interface.
 ---
 
 ## 🌟 Key Features
@@ -73,8 +78,7 @@ I am continuously working to improve this companion. Upcoming features include:
 
 ### 1. Clone the repository
 ```bash
-git clone [https://github.com/rizz01107/rizwan-ai-companion.git](https://github.com/rizz01107/rizwan-ai-companion.git)
-cd rizwan-ai-companion
+git clone https://github.com/rizz01107/rizwan-ai-companion.git
 ```
 ---
 ### 2. Environment Setup
@@ -89,6 +93,27 @@ venv\Scripts\activate
 ```bash
 pip install -r requirements.txt
 ```
+---
+
+## 🔑 Environment Variables
+
+To run this project, you will need to create a `.env` file in the root directory and add the following variables:
+
+| Variable | Description |
+| :--- | :--- |
+| `GROQ_API_KEY` | Your API key for Groq LLM |
+| `GOOGLE_API_KEY` | Your Google Gemini API key |
+| `TWILIO_ACCOUNT_SID` | Your Twilio Account SID |
+| `TWILIO_AUTH_TOKEN` | Your Twilio Auth Token |
+| `DATABASE_URL` | SQLite connection string (e.g., `sqlite+aiosqlite:///./rizwan_ai.db`) |
+
+---
+
+## ⚡ Performance Optimization
+
+- **Asynchronous Processing:** This project leverages `FastAPI`'s `async/await` syntax for non-blocking database operations and API calls, ensuring high performance even under multiple concurrent requests.
+- **SQLAlchemy 2.0:** Utilizes the latest ORM features for efficient database querying and management.
+
 ---
 
 ## 🚀 Running the Project
