@@ -15,7 +15,9 @@ A sophisticated AI-driven companion designed to provide personalized interaction
 ---
 
 ## 🌟 Key Features
+
 * **🧠 Brain Engine:** Context-aware conversation logic with integrated short-term and long-term memory.
+* **🌍 Universal Language Support:** Capable of understanding and responding in almost any global language, including **English, Urdu, Roman Urdu, Arabic, Spanish, and many more**.
 * **🎭 Emotion & Mood Analysis:** Real-time analysis of user input to track emotional states over time.
 * **📊 Dynamic Insights:** Interactive Mood History graphs using Chart.js for personality insights.
 * **🎨 AI Image Generation:** Integrated Image-Gen capabilities to turn text descriptions into art.
