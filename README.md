@@ -47,6 +47,28 @@ A sophisticated AI-driven companion designed to provide personalized interaction
 
 ---
 
+## 🧠 How It Works (AI Logic)
+
+The **Rizwan AI Companion** uses a sophisticated pipeline to ensure human-like interactions:
+
+* **Natural Language Processing (NLP):** Every user message is analyzed using `TextBlob` and custom logic to determine sentiment (Positive, Neutral, Negative) and detect specific emotional triggers.
+* **Contextual Memory:** To maintain a natural flow, the system implements a **Sliding-Window Memory**. It remembers the last few exchanges to provide context-aware responses without overloading the AI's token limit.
+* **High-Speed Reasoning:** The "Brain" is powered by **Groq / Google Gemini API**, allowing for near-instantaneous response generation with high reasoning capabilities.
+
+---
+
+## 🗺️ Future Roadmap
+
+I am continuously working to improve this companion. Upcoming features include:
+
+- [ ] **Voice-to-Text & Text-to-Voice:** Enabling real-time voice conversations via WhatsApp.
+- [ ] **Multilingual Support:** Enhancing NLP capabilities to support **Urdu** and Roman Urdu natively.
+- [ ] **Cloud Deployment:** Moving from local hosting to a scalable cloud architecture (AWS or Azure).
+- [ ] **Advanced Analytics:** More detailed personality reports based on weekly mood trends.
+
+---
+
+
 ## 🚀 Installation & Setup
 
 ### 1. Clone the repository
@@ -68,6 +90,43 @@ venv\Scripts\activate
 pip install -r requirements.txt
 ```
 ---
+
+## 🚀 Running the Project
+
+### **A. Start the Backend Server**
+To launch the FastAPI server, run the following command in your terminal:
+
+```bash
+python -m backend.app
+```
+
+---
+
+### **B. Start the Frontend**
+* Open `frontend/index.html` using the **VS Code Live Server** extension or simply open the file in any modern web browser.
+* Ensure that the `API_BASE_URL` in your `script.js` matches your running backend (default: `http://127.0.0.1:8000`).
+
+---
+
+### **C. Setup WhatsApp Integration (via ngrok)**
+To test the WhatsApp bot on your local machine, you must expose your local server to the internet:
+
+1. **Launch ngrok:**
+   ```bash
+   # Use ./ if ngrok is in your current directory
+   ./ngrok http 8000
+    ```
+
+    ---
+
+2. **Configure Twilio Sandbox:**
+   * Copy the **Forwarding URL** provided by ngrok (e.g., `https://xxxx.ngrok-free.app`).
+   * Go to the **Twilio Console > Messaging > Settings > WhatsApp Sandbox Settings**.
+   * Paste the URL in the **"When a message comes in"** field and append the endpoint:
+     `https://your-ngrok-url.ngrok-free.app/whatsapp/message`
+   * Ensure the request method is set to **HTTP POST** and click **Save**.
+
+   ---
 
 
 ## 👨‍💻 About the Developer
