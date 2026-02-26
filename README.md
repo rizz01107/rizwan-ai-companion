@@ -1,20 +1,9 @@
 # 🤖 Rizwan AI Companion
 
-<p align="center">
-  <img src="frontend/assets/rizwan-ai-preview.gif" width="100%" alt="Rizwan AI Preview" />
-</p>
-
----
-## 📺 Full Project Walkthrough
-
-Check out the complete system in action:
-
-[![Watch the Demo](https://img.shields.io/badge/🎬-Watch_Full_Video_Demo-red?style=for-the-badge)](https://github.com/rizz01107/rizwan-ai-companion/blob/main/frontend/assets/Rizwan-AI-Companion-Demo.mp4?raw=true)
-
-*> Click the button above to watch the walkthrough. Note: GitHub may require you to download the video to view it in full quality.*
+An Intelligent Personal AI Assistant with Emotion, Mood Tracking, and WhatsApp Integration.
 ---
 
-**An Intelligent Personal AI Assistant with Emotion, Mood Tracking, and WhatsApp Integration.**
+
 
 ![AI Engine](https://img.shields.io/badge/AI-Generative--AI-blueviolet)
 ![Mood Tracking](https://img.shields.io/badge/Mood-Tracking-orange)
@@ -27,6 +16,25 @@ Check out the complete system in action:
 ---
 
 A sophisticated AI-driven companion designed to provide personalized interactions, analyze moods, and detect emotions using advanced NLP techniques. This project integrates a modular FastAPI backend with a clean, responsive frontend and a WhatsApp bot interface.
+
+---
+
+## ⚡ Quick Preview
+See the AI in action (Auto-playing):
+
+<p align="center">
+  <img src="frontend/assets/rizwan-ai-preview.gif" width="100%" alt="Rizwan AI Preview" />
+</p>
+
+---
+## 📺 Full Project Walkthrough
+
+Check out the complete system in action:
+
+[![Watch the Demo](https://img.shields.io/badge/🎬-Watch_Full_Video_Demo-red?style=for-the-badge)](https://github.com/rizz01107/rizwan-ai-companion/blob/main/frontend/assets/Rizwan-AI-Companion-Demo.mp4?raw=true)
+
+*> Click the button above to watch the walkthrough. Note: GitHub may require you to download the video to view it in full quality.*
+
 ---
 
 ## 🌟 Key Features
