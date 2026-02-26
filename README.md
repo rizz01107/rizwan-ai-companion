@@ -27,13 +27,14 @@ See the AI in action (Auto-playing):
 </p>
 
 ---
+
 ## 📺 Full Project Walkthrough
 
 Check out the complete system in action:
 
-[![Watch the Demo](https://img.shields.io/badge/🎬-Watch_Full_Video_Demo-red?style=for-the-badge)](https://github.com/rizz01107/rizwan-ai-companion/blob/main/frontend/assets/Rizwan-AI-Companion-Demo.mp4?raw=true)
+[![Watch the Demo](https://img.shields.io/badge/🎬-Watch_Full_Video_Demo-red?style=for-the-badge)](https://github.com/rizz01107/rizwan-ai-companion/raw/main/frontend/assets/Rizwan-AI-Companion-Demo.mp4)
 
-*> Click the button above to watch the walkthrough. Note: GitHub may require you to download the video to view it in full quality.*
+*> Click the button above to watch the walkthrough. If the video doesn't play directly in the browser, GitHub will provide a download option.*
 
 ---
 
