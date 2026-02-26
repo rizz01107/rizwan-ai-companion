@@ -1,11 +1,15 @@
 # 🤖 Rizwan AI Companion
 
-![Rizwan AI Preview](./assets/rizwan-ai-preview.gif)
+<p align="center">
+  <img src="frontend/assets/rizwan-ai-preview.gif" width="100%" alt="Rizwan AI Preview" />
+</p>
 
 ## 📺 Full Project Walkthrough
-If you want to see the complete system in action—including login, dashboard analytics, and real-time WhatsApp chatting—watch the video below:
+Check out the complete system in action:
 
-[▶️ Watch Demo Video](./assets/Rizwan-AI-Companion-Demo.mp4)
+<div align="center">
+  <video src="frontend/assets/Rizwan-AI-Companion-Demo.mp4" width="100%" controls></video>
+</div>
 
 **An Intelligent Personal AI Assistant with Emotion, Mood Tracking, and WhatsApp Integration.**
 
@@ -37,9 +41,9 @@ A sophisticated AI-driven companion designed to provide personalized interaction
 ## 📸 Visual Overview
 
 <p align="center">
-  <img src="./assets/login.png" width="30%" alt="Login Page" />
-  <img src="./assets/dashboard.png" width="30%" alt="Dashboard" />
-  <img src="./assets/whatsapp.png" width="30%" alt="WhatsApp Interaction" />
+  <img src="frontend/assets/login.png" width="30%" alt="Login Page" />
+  <img src="frontend/assets/dashboard.png" width="30%" alt="Dashboard" />
+  <img src="frontend/assets/whatsapp.png" width="30%" alt="WhatsApp Interaction" />
 </p>
 
 ---
