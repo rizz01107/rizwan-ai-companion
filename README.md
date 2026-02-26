@@ -1,4 +1,12 @@
 # 🤖 Rizwan AI Companion
+
+![Rizwan AI Preview](./assets/rizwan-ai-preview.gif)
+
+## 📺 Full Project Walkthrough
+If you want to see the complete system in action—including login, dashboard analytics, and real-time WhatsApp chatting—watch the video below:
+
+[▶️ Watch Demo Video](./assets/Rizwan-AI-Companion-Demo.mp4)
+
 **An Intelligent Personal AI Assistant with Emotion, Mood Tracking, and WhatsApp Integration.**
 
 ![AI Engine](https://img.shields.io/badge/AI-Generative--AI-blueviolet)
@@ -23,6 +31,16 @@ A sophisticated AI-driven companion designed to provide personalized interaction
 * **🎨 AI Image Generation:** Integrated Image-Gen capabilities to turn text descriptions into art.
 * **📲 WhatsApp Integration:** Seamlessly chat with your AI companion via Twilio WhatsApp API.
 * **🔐 Secure Auth:** JWT-based user registration and login for personalized data management.
+
+---
+
+## 📸 Visual Overview
+
+<p align="center">
+  <img src="./assets/login.png" width="30%" alt="Login Page" />
+  <img src="./assets/dashboard.png" width="30%" alt="Dashboard" />
+  <img src="./assets/whatsapp.png" width="30%" alt="WhatsApp Interaction" />
+</p>
 
 ---
 
@@ -68,10 +86,11 @@ The **Rizwan AI Companion** uses a sophisticated pipeline to ensure human-like i
 
 I am continuously working to improve this companion. Upcoming features include:
 
-- [ ] **Voice-to-Text & Text-to-Voice:** Enabling real-time voice conversations via WhatsApp.
-- [ ] **Multilingual Support:** Enhancing NLP capabilities to support **Urdu** and Roman Urdu natively.
-- [ ] **Cloud Deployment:** Moving from local hosting to a scalable cloud architecture (AWS or Azure).
-- [ ] **Advanced Analytics:** More detailed personality reports based on weekly mood trends.
+- [ ] **🎙️ Voice Interactions:** Enabling real-time Voice-to-Text & Text-to-Voice conversations via WhatsApp.
+- [ ] **🧠 Advanced NLP Refining:** Improving sentiment accuracy specifically for complex **Roman Urdu** slangs and local dialects.
+- [ ] **☁️ Cloud Deployment:** Moving from local hosting to a scalable cloud architecture (AWS or Azure).
+- [ ] **💾 Memory Persistence:** Implementing a Vector Database (like Pinecone) for even deeper long-term memory.
+- [ ] **📊 Advanced Analytics:** More detailed personality reports based on weekly mood trends.
 
 ---
 
